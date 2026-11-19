@@ -1,0 +1,204 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f7b34abe-5036-4787-b20f-a4bce13e1783",
+      "name": "When chat message received",
+      "webhookId": "ec64df52-da51-4891-a786-2929944a2bf7"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the drafting stage of an internship application workflow.\n\nThe user will provide a job description and candidate information.\n\nRead the information below and write a concise application response for the candidate.\n\nUse only the information provided.\nDo not ask the user for more information.\nDo not invent skills, experience, metrics, qualifications, or projects.\nKeep it natural and specific to the role.\n\nUSER INPUT:\n{{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are helping me with internship applications.\n\nThe user's input will contain a job description and possibly candidate information.\n\nCreate a concise, truthful application response tailored to the role.\n\nUse only information provided by the user.\nDo not invent skills, experience, metrics, qualifications, or projects.\n\nKeep the response natural and professional.\nReturn only the draft application response."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e9420798-b05a-49cb-8b88-92e20779fcfc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        208
+      ],
+      "id": "eca55622-4844-4674-919e-72f2d004b08f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Critique the internship application draft below.\n\nCheck it for:\n1. Relevance to the target role\n2. Clarity\n3. Specificity\n4. Unsupported or exaggerated claims\n5. Missing important information\n\nIdentify specific problems and explain how each should be fixed.\n\nAt the end, include the original draft under the heading \"ORIGINAL DRAFT\".\n\nDraft:\n{{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "d1a5d4de-ac8c-4b4b-a0dc-4d9855f8f6df",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        110.671875
+      ],
+      "id": "53a50c46-511b-49c0-964c-d27a6dc79728",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Rewrite the internship application using the draft and critique below.\n\nRequirements:\n- Keep it concise and natural.\n- Make it specific to the target role.\n- Preserve factual information from the original draft.\n- Use only metrics, technologies, experience, and results actually stated in the original draft.\n- Do not adopt hypothetical examples or suggestions from the critique as facts.\n- Do not invent skills, experience, metrics, qualifications, or projects.\n- Return only the final revised application response.\n\nCRITIQUE AND ORIGINAL DRAFT:\n{{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        0
+      ],
+      "id": "a43ecf9a-772f-43f0-8dd2-6aedc9225164",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        113.671875
+      ],
+      "id": "bad9322b-82fe-4605-b253-a3f72cd8d57e",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
